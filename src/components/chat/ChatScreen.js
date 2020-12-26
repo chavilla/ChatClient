@@ -1,9 +1,10 @@
-import React from 'react'
+import React from 'react';
 
-const ChatScreen = () => {
+const ChatScreen = ({ title }) => {
+
     return (
         <div>
-            Chat
+            <h1>{title}</h1>
         </div>
     )
 }
