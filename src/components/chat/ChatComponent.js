@@ -1,27 +1,45 @@
-import React, { useEffect } from 'react';
-import queryString from 'query-string';
-import ChatScreen from './ChatScreen';
-import io from 'socket.io-client';
-import { Redirect } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import queryString from "query-string";
+import ChatScreen from "./ChatScreen";
+import io from "socket.io-client";
 
 const ChatComponent = ({ location }) => {
+  
+  let socket;
+  const [name, setName] = useState("");
+  const [room, setRoom] = useState("");
 
-    if(location.search===''){
-        console.log('hola');
-        <Redirect to='/' />
-    } 
+  // Route to connect the chat
+  const ENDPOINT = "http://localhost:4000";
 
-    useEffect(()=>{
-            
-        const data = queryString.parse(location.search);
+  // options to connect
+  const connectionOptions = {
+    "force new connection": true,
+    reconnectionAttempts: "Infinity",
+    timeout: 10000,
+    transports: ["websocket"],
+  };
 
-    },[location.search, location]);
+  // Make the connection
+  socket = io(ENDPOINT, connectionOptions);
 
-    return (
-       <ChatScreen 
-            title = 'Welcome to the Chat'
-       />
-    )
-}
+  useEffect(() => {
+    const { name, room } = queryString.parse(location.search);
+    //connect to chat
+    setName(name);
+    setRoom(room);
 
-export default ChatComponent
+    socket.emit('join', { name, room }, ({ error }) => {
+        
+    });
+
+    return () => {
+      //socket.emit("disconnect");
+      //socket.off();
+    };
+  }, [location.search, socket]);
+
+  return <ChatScreen title="Welcome to the Chat" name={name} room={room} />;
+};
+
+export default ChatComponent;
